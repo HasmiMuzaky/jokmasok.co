@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Tambah Order Skripsi - JOKMASOK.CO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .form-page-container {
+      max-width: 840px;
+      margin: 32px auto;
+      padding: 0 20px 60px;
+    }
+
+    .form-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 32px 36px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      margin-top: 16px;
+    }
+
+    .form-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .form-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 20px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group select,
+    .form-group textarea,
+    .form-group input {
+      background: #080d1a;
+      border: 1px solid var(--panel-border);
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.92rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group select:focus,
+    .form-group textarea:focus,
+    .form-group input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .form-group select option {
+      background: #0d162e;
+      color: #fff;
+    }
+
+    /* Sub-menu dinamis paket skripsi */
+    .dynamic-box {
+      background: rgba(56, 189, 248, 0.04);
+      border: 1px dashed rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: -6px;
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .dynamic-box.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Selector Bahan Tugas */
+    .attachment-mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 9px 12px;
+      background: #080d1a;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .attachment-panel {
+      display: none;
+    }
+
+    .attachment-panel.active {
+      display: block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      border: 1px dashed var(--panel-border);
+      cursor: pointer;
+    }
+
+    .file-input-wrapper input[type="file"]::file-selector-button {
+      background: var(--accent-soft);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .file-input-wrapper input[type="file"]::file-selector-button:hover {
+      background: var(--accent-blue);
+      color: #041022;
+    }
+
+    .btn-back {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .btn-back:hover {
+      color: var(--accent-blue);
+    }
+
+    .info-badge {
+      font-size: 0.78rem;
+      color: var(--accent-blue);
+      margin-top: 6px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-page-container">
+    <a href="index.html" class="btn-back">← Kembali ke Beranda</a>
+
+    <div class="form-card elevate-card">
+      <div class="form-header">
+        <div>
+          <h1>Formulir Order Layanan Skripsi</h1>
+          <p class="subtitle">Spesialisasi pengerjaan per bab, full tanpa revisi, dan paket full revisi cicilan</p>
+        </div>
+        <img src="logo.png" alt="Logo" class="brand-logo" />
+      </div>
+
+      <form id="form-order-page" class="form-grid">
+        
+        <!-- ================= BAGIAN 1: IDENTITAS PENGORDER ================= -->
+        <div class="form-section-title">1. Data Pengorder</div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="client-name">Nama Pengorder</label>
+            <input type="text" id="client-name" placeholder="Nama lengkap klien" required />
+          </div>
+          <div class="form-group">
+            <label for="client-phone">No. WhatsApp / Telepon</label>
+            <input type="tel" id="client-phone" placeholder="08xxxxxxxxxx" required />
+          </div>
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-group" style="flex: 2;">
+            <label for="client-institution">Perguruan Tinggi / Universitas / Sekolah / Instansi</label>
+            <input type="text" id="client-institution" placeholder="Contoh: Universitas Brawijaya / UNY" required />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="client-level">Kelas / Semester</label>
+            <input type="text" id="client-level" placeholder="Contoh: Semester 8" required />
+          </div>
+        </div>
+
+        <!-- ================= BAGIAN 2: PAKET LAYANAN SKRIPSI ================= -->
+        <div class="form-section-title">2. Paket Layanan & Judul Skripsi</div>
+
+        <div class="form-group-row">
+          <div class="form-group" style="flex: 2;">
+            <label for="skripsi-package">Pilihan Paket Pengerjaan Skripsi</label>
+            <select id="skripsi-package" required>
+              <option value="" disabled selected>Pilih paket layanan...</option>
+              <option value="Pengerjaan Per Bab">Pengerjaan Per Bab</option>
+              <option value="Full Skripsi Tanpa Revisi">Full Skripsi Sekali Jadi (Tanpa Revisi)</option>
+              <option value="Full Revisi Pengerjaan Skripsi">Full Revisi Pengerjaan Skripsi (Bisa Dicicil)</option>
+              <option value="Tugas Non-Skripsi / Makalah / Lainnya">Tugas Lainnya (Makalah/Koding/PPT)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="order-date">Tanggal Masuk</label>
+            <input type="date" id="order-date" required />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="duration">Target Waktu</label>
+            <input type="text" id="duration" placeholder="Contoh: 3 Minggu / 3 Bulan" required />
+          </div>
+        </div>
+
+        <!-- Dinamis 2A: Pemilihan Bab (Jika Pengerjaan Per Bab) -->
+        <div id="box-per-bab" class="dynamic-box">
+          <div class="form-group">
+            <label for="selected-bab">Pilih Bab yang Dikerjakan</label>
+            <select id="selected-bab">
+              <option value="Bab 1 (Pendahuluan)">Bab 1 (Pendahuluan & Rumusan Masalah)</option>
+              <option value="Bab 2 (Tinjauan Pustaka)">Bab 2 (Tinjauan Pustaka / Landasan Teori)</option>
+              <option value="Bab 3 (Metodologi Penelitian)">Bab 3 (Metode Penelitian)</option>
+              <option value="Bab 4 (Hasil & Pembahasan)">Bab 4 (Hasil & Pembahasan / Olah Data)</option>
+              <option value="Bab 5 (Kesimpulan & Saran)">Bab 5 (Penutup / Kesimpulan)</option>
+              <option value="Proposal (Bab 1 - 3)">Proposal Lengkap (Bab 1, 2, dan 3)</option>
+              <option value="Bab 4 - 5 (Hasil & Penutup)">Bab 4 dan 5 (Hasil Penelitian & Penutup)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dinamis 2B: Skema Cicilan (Jika Full Revisi Skripsi) -->
+        <div id="box-full-revisi" class="dynamic-box">
+          <div class="form-group">
+            <label for="installment-scheme">Pilih Skema Cicilan Pembayaran</label>
+            <select id="installment-scheme">
+              <option value="Pembayaran Per Revisi">Pembayaran Per Revisi (Bayar setiap kali acc revisi)</option>
+              <option value="Per Minggu (12 Minggu)">Per Minggu (12 Kali Pembayaran / 12 Minggu)</option>
+              <option value="Per Bulan (3 Bulan)">Per Bulan (3 Kali Pembayaran / 3 Bulan)</option>
+              <option value="2x Bayar (DP 70% & Pelunasan 30%)">2x Pembayaran (DP 70% di Awal & 30% di Akhir)</option>
+            </select>
+            <span id="installment-hint" class="info-badge"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="task-title">Judul Skripsi / Proposal / Penelitian</label>
+          <input type="text" id="task-title" placeholder="Contoh: Pengaruh Kepemimpinan Transformasional Terhadap Kinerja Karyawan..." required />
+        </div>
+
+        <!-- ================= BAGIAN 3: KEUANGAN & PEMBAYARAN ================= -->
+        <div class="form-section-title">3. Pembayaran & Bukti Transfer</div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="total-deal-price">Total Kesepakatan Biaya (Rp)</label>
+            <input type="number" id="total-deal-price" placeholder="Contoh: 3500000" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="amount-paid">Nominal Dibayarkan Saat Ini (Rp)</label>
+            <input type="number" id="amount-paid" placeholder="Contoh: DP / Cicilan Pertama" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="payment-method">Metode Pembayaran</label>
+            <select id="payment-method" required>
+              <option value="Transfer Bank">Transfer Bank (BCA/BRI/Mandiri/BNI)</option>
+              <option value="QRIS">QRIS All Payment</option>
+              <option value="E-Wallet">E-Wallet (Dana/GoPay/OVO/ShopeePay)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bukti Pembayaran -->
+        <div class="form-group file-input-wrapper">
+          <label for="payment-proof-file">Upload Bukti Transfer / Struk (Opsional)</label>
+          <input type="file" id="payment-proof-file" accept=".png,.jpg,.jpeg,.pdf" />
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+            Screenshot m-Banking atau struk ATM.
+          </span>
+        </div>
+
+        <!-- ================= BAGIAN 4: BAHAN SKRIPSI & INSTRUKSI ================= -->
+        <div class="form-section-title">4. Bahan Tugas & Pedoman Kampus</div>
+
+        <div class="form-group">
+          <label>Materi / Pedoman Skripsi dari Klien</label>
+          <div class="attachment-mode-selector">
+            <div id="btn-mode-link" class="mode-btn active">Tautkan Link (Drive / Dropbox)</div>
+            <div id="btn-mode-upload" class="mode-btn">Upload File Langsung</div>
+          </div>
+
+          <!-- Panel 1: Input Link -->
+          <div id="panel-link" class="attachment-panel active">
+            <input type="url" id="task-link" placeholder="Tempel tautan Google Drive buku panduan skripsi/jurnal acuan..." />
+          </div>
+
+          <!-- Panel 2: Upload File -->
+          <div id="panel-upload" class="attachment-panel file-input-wrapper">
+            <input type="file" id="task-file" accept=".pdf,.doc,.docx,.zip,.rar" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="task-notes">Catatan Dosen / Instruksi Khusus (Opsional)</label>
+          <textarea id="task-notes" placeholder="Tuliskan catatan khusus (misal: metode kuantitatif path analysis, wajib pakai referensi jurnal internasional 5 tahun terakhir, batas plagiasi turnitin 20%)..."></textarea>
+        </div>
+
+        <!-- Aksi Tombol -->
+        <div class="modal-actions" style="margin-top: 14px;">
+          <a href="index.html" class="btn-secondary" style="text-decoration: none;">Batal</a>
+          <button type="submit" id="btn-submit-order" class="btn-primary">Simpan Order Skripsi</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // URL Web App Google Apps Script Terbaru
+    const API_URL = "https://script.google.com/macros/s/AKfycbxgwyni7Nhd3OfDD9-manjDxLMxlhhfMTYyZ_dQqbTffcP61SidX2C4ayyUXBh-RObB/exec";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('order-date');
+      if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      const selectPackage = document.getElementById('skripsi-package');
+      const boxPerBab = document.getElementById('box-per-bab');
+      const boxFullRevisi = document.getElementById('box-full-revisi');
+      const selectInstallment = document.getElementById('installment-scheme');
+      const installmentHint = document.getElementById('installment-hint');
+      const inputTotalDeal = document.getElementById('total-deal-price');
+      const inputAmountPaid = document.getElementById('amount-paid');
+
+      const updateHints = () => {
+        const total = Number(inputTotalDeal.value) || 0;
+        const scheme = selectInstallment.value;
+
+        if (selectPackage.value === 'Full Revisi Pengerjaan Skripsi') {
+          if (scheme === '2x Bayar (DP 70% & Pelunasan 30%)' && total > 0) {
+            const dp70 = Math.round(total * 0.7);
+            const sisa30 = total - dp70;
+            installmentHint.textContent = `💡 DP 70%: Rp ${dp70.toLocaleString('id-ID')} | Sisa 30%: Rp ${sisa30.toLocaleString('id-ID')}`;
+            if (!inputAmountPaid.value || inputAmountPaid.value == 0) {
+              inputAmountPaid.value = dp70;
+            }
+          } else if (scheme === 'Per Minggu (12 Minggu)' && total > 0) {
+            const perWeek = Math.round(total / 12);
+            installmentHint.textContent = `💡 Cicilan 12x: sekitar Rp ${perWeek.toLocaleString('id-ID')} / minggu`;
+          } else if (scheme === 'Per Bulan (3 Bulan)' && total > 0) {
+            const perMonth = Math.round(total / 3);
+            installmentHint.textContent = `💡 Cicilan 3x: sekitar Rp ${perMonth.toLocaleString('id-ID')} / bulan`;
+          } else {
+            installmentHint.textContent = '💡 Biaya ditagihkan bertahap setiap hasil revisi dosen diserahkan.';
+          }
+        }
+      };
+
+      selectPackage.addEventListener('change', () => {
+        const val = selectPackage.value;
+        if (val === 'Pengerjaan Per Bab') {
+          boxPerBab.classList.add('active');
+          boxFullRevisi.classList.remove('active');
+        } else if (val === 'Full Revisi Pengerjaan Skripsi') {
+          boxPerBab.classList.remove('active');
+          boxFullRevisi.classList.add('active');
+          updateHints();
+        } else {
+          boxPerBab.classList.remove('active');
+          boxFullRevisi.classList.remove('active');
+        }
+      });
+
+      selectInstallment.addEventListener('change', updateHints);
+      inputTotalDeal.addEventListener('input', updateHints);
+
+      const btnModeLink = document.getElementById('btn-mode-link');
+      const btnModeUpload = document.getElementById('btn-mode-upload');
+      const panelLink = document.getElementById('panel-link');
+      const panelUpload = document.getElementById('panel-upload');
+      let activeMode = 'link';
+
+      btnModeLink.addEventListener('click', () => {
+        activeMode = 'link';
+        btnModeLink.classList.add('active');
+        btnModeUpload.classList.remove('active');
+        panelLink.classList.add('active');
+        panelUpload.classList.remove('active');
+      });
+
+      btnModeUpload.addEventListener('click', () => {
+        activeMode = 'upload';
+        btnModeUpload.classList.add('active');
+        btnModeLink.classList.remove('active');
+        panelUpload.classList.add('active');
+        panelLink.classList.remove('active');
+      });
+
+      const fileToBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = (err) => reject(err);
+      });
+
+      const form = document.getElementById('form-order-page');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('btn-submit-order');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan ke Sistem...';
+
+        const clientName = document.getElementById('client-name').value.trim();
+        const clientPhone = document.getElementById('client-phone').value.trim();
+        const clientInstitution = document.getElementById('client-institution').value.trim();
+        const clientLevel = document.getElementById('client-level').value.trim();
+
+        const skripsiPackage = selectPackage.value;
+        let packageDetail = skripsiPackage;
+        let installmentDetail = '-';
+
+        if (skripsiPackage === 'Pengerjaan Per Bab') {
+          packageDetail = `Per Bab: ${document.getElementById('selected-bab').value}`;
+        } else if (skripsiPackage === 'Full Revisi Pengerjaan Skripsi') {
+          installmentDetail = selectInstallment.value;
+        }
+
+        const orderDate = document.getElementById('order-date').value;
+        const duration = document.getElementById('duration').value.trim();
+        const taskTitle = document.getElementById('task-title').value.trim();
+
+        const totalDealPrice = Number(inputTotalDeal.value) || 0;
+        const amountPaid = Number(inputAmountPaid.value) || 0;
+        const paymentMethod = document.getElementById('payment-method').value;
+        const taskNotes = document.getElementById('task-notes').value.trim();
+
+        let attachmentLink = '';
+        let taskFileBase64 = '';
+        let taskFileName = '';
+        let taskFileType = '';
+
+        if (activeMode === 'link') {
+          attachmentLink = document.getElementById('task-link').value.trim();
+        } else {
+          const taskFileInput = document.getElementById('task-file');
+          if (taskFileInput.files.length > 0) {
+            const f = taskFileInput.files[0];
+            taskFileName = f.name;
+            taskFileType = f.type;
+            taskFileBase64 = await fileToBase64(f);
+          }
+        }
+
+        let proofBase64 = '';
+        let proofFileName = '';
+        let proofFileType = '';
+        const proofInput = document.getElementById('payment-proof-file');
+        if (proofInput.files.length > 0) {
+          const pf = proofInput.files[0];
+          proofFileName = 'BUKTI_' + pf.name;
+          proofFileType = pf.type;
+          proofBase64 = await fileToBase64(pf);
+        }
+
+        const payload = {
+          clientName,
+          clientPhone,
+          clientInstitution,
+          clientLevel,
+          packageDetail,
+          installmentDetail,
+          orderDate,
+          duration,
+          taskTitle,
+          totalDealPrice,
+          amountPaid,
+          paymentMethod,
+          attachmentLink,
+          taskFileName,
+          taskFileType,
+          taskFileBase64,
+          proofFileName,
+          proofFileType,
+          proofBase64,
+          taskNotes
+        };
+
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          alert('Order skripsi berhasil dicatat ke sistem!');
+          window.location.href = 'index.html';
+        } catch (err) {
+          console.error(err);
+          alert('Gagal menyimpan order.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Simpan Order Skripsi';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

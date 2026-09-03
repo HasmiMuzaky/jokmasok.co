@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Alur Pengerjaan Tugas (Kanban) - JOKMASOK.CO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Tab Switcher Horizontal Scroll di HP */
+    .kanban-tabs-mobile {
+      display: flex;
+      gap: 6px;
+      background: var(--panel-bg);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      margin-bottom: 16px;
+      overflow-x: auto;
+      white-space: nowrap;
+      position: sticky;
+      top: 60px;
+      z-index: 50;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .k-tab-btn {
+      flex: 0 0 auto;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .k-tab-btn.active {
+      background: var(--panel-card);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .k-badge {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+    }
+
+    /* Papan Kanban Grid */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(250px, 1fr));
+      gap: 14px;
+      align-items: flex-start;
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+
+    .kanban-col {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 420px;
+    }
+
+    .col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .col-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cards-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .kanban-task-card {
+      background: var(--panel-card);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kanban-task-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .revision-pill {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .kanban-board {
+        grid-template-columns: 1fr;
+        overflow-x: visible;
+      }
+
+      .kanban-col {
+        display: none;
+      }
+
+      .kanban-col.active-col {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 901px) {
+      .kanban-tabs-mobile {
+        display: none;
+      }
+      .kanban-col {
+        display: flex !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drawer Samping -->
+  <aside id="menu-drawer" class="menu-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 800; font-size: 1.05rem; color: #fff;">JOKMASOK.CO</div>
+        <div style="font-size: 0.68rem; color: var(--accent-cyan);">Jasa Joki Aman dan Terpercaya</div>
+      </div>
+      <button id="btn-close-menu" class="btn-icon" aria-label="Tutup Menu">✕</button>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">📊 Dashboard Utama</a>
+      <a href="alur-tugas.html" class="nav-link active">📋 Alur Tugas (Kanban)</a>
+      <a href="piutang-klien.html" class="nav-link">💰 Rekap Piutang Klien</a>
+      <a href="tambah-order.html" class="nav-link">➕ Catat Order Baru</a>
+      <button id="menu-refresh" class="nav-link" style="background: none; border: none; width: 100%; cursor: pointer;">🔄 Sinkronkan Database</button>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="menu-overlay"></div>
+
+  <!-- Header Sticky -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <button id="btn-open-menu" class="btn-icon" aria-label="Buka Menu">☰</button>
+      <div>
+        <div class="brand-title">Alur Pengerjaan</div>
+        <div class="brand-tagline">Monitoring Kanban & Revisi</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="index.html" class="btn-secondary">← Beranda</a>
+      <a href="tambah-order.html" class="btn-primary">+ Order</a>
+    </div>
+  </header>
+
+  <main class="app-container" style="max-width: 1400px;">
+
+    <!-- Tab Filter Cepat (Tampil di Layar HP) -->
+    <div class="kanban-tabs-mobile">
+      <button type="button" class="k-tab-btn active" data-target="col-queue" style="color: var(--status-queue);">
+        Antrean <span class="k-badge" id="m-count-queue">0</span>
+      </button>
+      <button type="button" class="k-tab-btn" data-target="col-progress" style="color: var(--status-progress);">
+        Dikerjakan <span class="k-badge" id="m-count-progress">0</span>
+      </button>
+      <button type="button" class="k-tab-btn" data-target="col-review" style="color: var(--status-review);">
+        Review <span class="k-badge" id="m-count-review">0</span>
+      </button>
+      <button type="button" class="k-tab-btn" data-target="col-revision" style="color: #ef4444;">
+        Revisi <span class="k-badge" id="m-count-revision">0</span>
+      </button>
+      <button type="button" class="k-tab-btn" data-target="col-done" style="color: var(--status-success);">
+        Selesai <span class="k-badge" id="m-count-done">0</span>
+      </button>
+    </div>
+
+    <!-- Papan Kanban 5 Kolom Lengkap -->
+    <div class="kanban-board">
+      
+      <!-- 1. Antrean Masuk -->
+      <section id="col-queue" class="kanban-col active-col">
+        <div class="col-header">
+          <div class="col-title" style="color: var(--status-queue);">
+            <span>📥 Antrean Masuk</span>
+          </div>
+          <span class="k-badge" id="badge-count-queue">0</span>
+        </div>
+        <div id="list-queue" class="cards-wrapper">
+          <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 30px 0;">Menyinkronkan...</p>
+        </div>
+      </section>
+
+      <!-- 2. Sedang Dikerjakan -->
+      <section id="col-progress" class="kanban-col">
+        <div class="col-header">
+          <div class="col-title" style="color: var(--status-progress);">
+            <span>⚡ Sedang Dikerjakan</span>
+          </div>
+          <span class="k-badge" id="badge-count-progress">0</span>
+        </div>
+        <div id="list-progress" class="cards-wrapper">
+          <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 30px 0;">Menyinkronkan...</p>
+        </div>
+      </section>
+
+      <!-- 3. Masa Review -->
+      <section id="col-review" class="kanban-col">
+        <div class="col-header">
+          <div class="col-title" style="color: var(--status-review);">
+            <span>🔍 Menunggu Review</span>
+          </div>
+          <span class="k-badge" id="badge-count-review">0</span>
+        </div>
+        <div id="list-review" class="cards-wrapper">
+          <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 30px 0;">Menyinkronkan...</p>
+        </div>
+      </section>
+
+      <!-- 4. Perlu Revisi -->
+      <section id="col-revision" class="kanban-col">
+        <div class="col-header">
+          <div class="col-title" style="color: #f87171;">
+            <span>⚠️ Perlu Revisi</span>
+          </div>
+          <span class="k-badge" id="badge-count-revision" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">0</span>
+        </div>
+        <div id="list-revision" class="cards-wrapper">
+          <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 30px 0;">Menyinkronkan...</p>
+        </div>
+      </section>
+
+      <!-- 5. Selesai (Arsip) -->
+      <section id="col-done" class="kanban-col">
+        <div class="col-header">
+          <div class="col-title" style="color: var(--status-success);">
+            <span>🎉 Selesai (Arsip)</span>
+          </div>
+          <span class="k-badge" id="badge-count-done" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">0</span>
+        </div>
+        <div id="list-done" class="cards-wrapper">
+          <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 30px 0;">Menyinkronkan...</p>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script src="alur-tugas.js"></script>
+</body>
+</html>

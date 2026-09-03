@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Kelola & Delegasi Order - JOKMASOK.CO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Pustaka Otomasi PDF Client-Side -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    .manage-container {
+      max-width: 860px;
+      margin: 16px auto;
+      padding: 0 14px 60px;
+    }
+
+    .form-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 14px;
+    }
+
+    .form-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 18px 0 10px;
+    }
+
+    .detail-summary-box {
+      background: #080d1a;
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 8px;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .summary-label {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      min-width: 120px;
+    }
+
+    .summary-val {
+      font-size: 0.86rem;
+      color: #fff;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-group-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input, 
+    .form-group select {
+      background: #080d1a;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .worker-badge-card {
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .revision-box {
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .profit-preview-box {
+      background: rgba(56, 189, 248, 0.04);
+      border: 1px dashed rgba(56, 189, 248, 0.25);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    /* Template PDF (Mulai Rapat dari Atas, A4 Standard) */
+    #pdf-printable-area {
+      display: none;
+      background: #ffffff;
+      color: #0f172a;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 0;
+      margin: 0;
+      font-size: 8.8pt;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .summary-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+      .summary-val {
+        text-align: left;
+      }
+      .btn-action-group {
+        flex-direction: column-reverse;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="manage-container">
+    <a href="index.html" class="btn-secondary" style="margin-bottom: 14px; font-size: 0.78rem;">← Kembali ke Beranda</a>
+
+    <div class="form-card">
+      
+      <div class="form-header">
+        <div>
+          <h1 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 2px;">Kelola & Delegasi Order</h1>
+          <p id="task-id-badge" style="font-size: 0.74rem; color: var(--text-muted);">Menghubungkan ke database...</p>
+        </div>
+      </div>
+
+      <!-- 1. Ringkasan Pesanan Klien -->
+      <div class="form-section-title">1. Ringkasan Pesanan Klien</div>
+      <div class="detail-summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Nama Pengorder</span>
+          <span class="summary-val" id="d-client">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Instansi & Semester</span>
+          <span class="summary-val" id="d-institution">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Judul Tugas / Skripsi</span>
+          <span class="summary-val" id="d-title" style="color: var(--accent-cyan); text-align: right;">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Paket Layanan</span>
+          <span class="summary-val" id="d-package">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Skema Pembayaran</span>
+          <span class="summary-val" id="d-installment" style="color: #fbbf24;">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Target Durasi Waktu</span>
+          <span class="summary-val" id="d-duration">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Bahan & Bukti Klien</span>
+          <span class="summary-val" id="d-links">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Catatan Khusus</span>
+          <span class="summary-val" id="d-notes" style="font-weight: 400; color: #cbd5e1;">-</span>
+        </div>
+      </div>
+
+      <!-- 2. Formulir Delegasi & Status -->
+      <form id="form-manage-task" class="form-grid">
+        <input type="hidden" id="task-id" />
+
+        <div class="form-section-title">2. Delegasi Pekerja & Status Alur</div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="task-status">Status Alur Pengerjaan</label>
+            <select id="task-status" required>
+              <option value="Antrean">Antrean Masuk</option>
+              <option value="Sedang Dikerjakan">Sedang Dikerjakan</option>
+              <option value="Review">Menunggu Review</option>
+              <option value="Revisi">Perlu Revisi</option>
+              <option value="Selesai">Selesai (Arsipkan)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="worker-select">Pilih Pekerja / Joki</label>
+            <select id="worker-select" required>
+              <option value="" disabled selected>Pilih pekerja...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kartu Info Rating & Jam Terbang Pekerja -->
+        <div id="worker-tier-card" class="worker-badge-card" style="display: none;">
+          <div>
+            <div id="tier-worker-name" style="font-size: 0.9rem; font-weight: 700; color: #fff;">-</div>
+            <div id="tier-worker-meta" style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Jam terbang: 0 tugas</div>
+          </div>
+          <div style="text-align: right;">
+            <div id="tier-worker-badge" style="font-size: 0.84rem; font-weight: 700; color: var(--accent-cyan);">-</div>
+            <div id="tier-worker-stars" style="font-size: 0.76rem; color: #f59e0b; margin-top: 2px;">⭐ 4.0</div>
+          </div>
+        </div>
+
+        <!-- Pencatatan Jumlah Revisi -->
+        <div class="revision-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="revision-count" style="margin: 0; color: #f87171; font-weight: 700; font-size: 0.78rem;">Jumlah Revisi yang Berjalan</label>
+            <button type="button" id="btn-add-revision" style="background: #ef4444; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">+1 Tambah Revisi</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+            <input type="number" id="revision-count" value="0" min="0" style="max-width: 80px; font-size: 1rem; font-weight: 800; text-align: center;" />
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Kali revisi telah dicatat untuk tugas ini.</span>
+          </div>
+        </div>
+
+        <div class="form-section-title">3. Alokasi Fee & Pembayaran Masuk</div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="deal-price-display">Total Kesepakatan Biaya</label>
+            <input type="text" id="deal-price-display" readonly style="opacity: 0.7; cursor: not-allowed;" />
+          </div>
+          <div class="form-group">
+            <label for="worker-fee">Fee untuk Pekerja / Joki</label>
+            <input type="text" id="worker-fee" placeholder="Rp 0" required />
+          </div>
+          <div class="form-group">
+            <label for="amount-paid">Total Uang Masuk dari Klien</label>
+            <input type="text" id="amount-paid" placeholder="Rp 0" required />
+          </div>
+        </div>
+
+        <!-- Bukti Transfer Admin ke Joki -->
+        <div class="form-group">
+          <label for="admin-proof-payment">Tautan Bukti Transfer Admin ke Joki (DP / Pelunasan)</label>
+          <input type="url" id="admin-proof-payment" placeholder="https://drive.google.com/... atau link gambar struk" />
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Opsional: Tempelkan link bukti transfer bank/e-wallet untuk ditampilkan di lembar PDF joki.</span>
+        </div>
+
+        <!-- Realtime Live Preview -->
+        <div class="profit-preview-box">
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Sisa Piutang Klien:</div>
+            <div id="preview-balance" style="font-size: 0.95rem; font-weight: 700; color: #f59e0b;">Rp 0</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Estimasi Profit Bersih Admin:</div>
+            <div id="preview-profit" style="font-size: 0.95rem; font-weight: 700; color: var(--accent-cyan);">Rp 0</div>
+          </div>
+        </div>
+
+        <!-- Tombol Unduh PDF Otomatis -->
+        <div style="margin-top: 10px;">
+          <button type="button" id="btn-generate-pdf" class="btn-secondary" style="width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 700; padding: 10px;">
+            📥 Download Otomatis PDF Work Order Joki
+          </button>
+        </div>
+
+        <div class="btn-action-group">
+          <a href="index.html" class="btn-secondary" style="flex: 1; text-align: center;">Batal</a>
+          <button type="submit" id="btn-submit-update" class="btn-primary" style="flex: 2;">Simpan & Update Status</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- TEMPLATE DOKUMEN PDF (RAPAT DARI ATAS, TANPA NOMOR HP KLIEN) -->
+  <div id="pdf-printable-area">
+    <!-- Header / Kop Surat -->
+    <table style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #0f172a; padding-bottom: 6px; margin-bottom: 10px;">
+      <tr>
+        <td style="vertical-align: top;">
+          <div style="font-size: 16pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1;">JOKMASOK.CO</div>
+          <div style="font-size: 8.5pt; color: #0284c7; font-weight: 700; text-transform: uppercase; margin-top: 2px; letter-spacing: 0.5px;">Jasa Joki Aman dan Terpercaya</div>
+        </td>
+        <td style="text-align: right; vertical-align: top;">
+          <div style="background: #0f172a; color: #38bdf8; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 8.5pt; display: inline-block;">SURAT PENUGASAN (WORK ORDER)</div>
+          <div id="pdf-doc-id" style="font-size: 8pt; color: #475569; font-weight: bold; margin-top: 4px;">ID DOKUMEN: -</div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Bagian 1: Informasi Penugasan & Joki -->
+    <div style="background: #f1f5f9; padding: 4px 8px; font-weight: bold; border-left: 3px solid #0284c7; margin-bottom: 6px; font-size: 8.8pt;">1. INFORMASI PENUGASAN & JOKI PELAKSANA</div>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 8.5pt;">
+      <tr><td style="width: 28%; color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9;">Pekerja / Joki Terpilih</td><td id="pdf-worker-val" style="font-weight: bold; color: #0f172a; border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9;">Target Durasi Waktu</td><td id="pdf-duration-val" style="font-weight: bold; color: #b91c1c; border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0;">Status Pengerjaan</td><td style="font-weight: bold; color: #0284c7;">Sedang Dikerjakan (In Progress)</td></tr>
+    </table>
+
+    <!-- Bagian 2: Data Klien & Rincian Proyek -->
+    <div style="background: #f1f5f9; padding: 4px 8px; font-weight: bold; border-left: 3px solid #0284c7; margin-bottom: 6px; font-size: 8.8pt;">2. DATA KLIEN & SPESIFIKASI PROYEK</div>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 8.5pt;">
+      <tr><td style="width: 28%; color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9;">Nama Pengorder / Klien</td><td id="pdf-client-name" style="font-weight: bold; color: #0f172a; border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9;">Instansi Kampus & Tingkat</td><td id="pdf-client-inst" style="border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9; vertical-align: top;">Judul Skripsi / Topik</td><td id="pdf-title-val" style="font-weight: bold; color: #0f172a; border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9;">Paket Layanan</td><td id="pdf-package-val" style="border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; border-bottom: 1px solid #f1f5f9; vertical-align: top;">Link Bahan / Materi Dokumen</td><td id="pdf-link-val" style="color: #0284c7; word-break: break-all; border-bottom: 1px solid #f1f5f9;">-</td></tr>
+      <tr><td style="color: #475569; padding: 3px 0; vertical-align: top;">Catatan Khusus / Dosen</td><td id="pdf-notes-val" style="white-space: pre-line;">-</td></tr>
+    </table>
+
+    <!-- Bagian 3: Hak Kompensasi & Bukti Transfer -->
+    <div style="background: #f1f5f9; padding: 4px 8px; font-weight: bold; border-left: 3px solid #0284c7; margin-bottom: 6px; font-size: 8.8pt;">3. HAK FINANSIAL & BUKTI PEMBAYARAN</div>
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td>
+            <div style="font-size: 7.5pt; color: #166534; font-weight: bold; text-transform: uppercase;">Total Hak Fee Pekerja (Bersih)</div>
+            <div id="pdf-fee-val" style="font-size: 13pt; font-weight: 800; color: #15803d; margin: 1px 0;">Rp 0</div>
+          </td>
+          <td style="text-align: right; vertical-align: middle;">
+            <div style="font-size: 7.5pt; color: #475569; font-weight: bold;">BUKTI TRANSFER ADMIN:</div>
+            <div id="pdf-admin-proof" style="font-size: 8pt; color: #0284c7; word-break: break-all;">Tercatat Resmi di Sistem</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Bagian 4: SOP Kerja -->
+    <div style="background: #f1f5f9; padding: 4px 8px; font-weight: bold; border-left: 3px solid #0284c7; margin-bottom: 6px; font-size: 8.8pt;">4. KETENTUAN & STANDAR OPERASIONAL (SOP)</div>
+    <ol style="margin: 0; padding-left: 18px; font-size: 7.8pt; color: #334155; line-height: 1.35;">
+      <li><strong>Kerahasiaan Dokumen:</strong> Dilarang keras menyebarkan identitas klien atau berkas penugasan ke pihak mana pun.</li>
+      <li><strong>Standar Turnitin:</strong> Hasil pengerjaan wajib lolos pengecekan anti-plagiasi sesuai batas maksimal kampus.</li>
+      <li><strong>Komitmen Revisi:</strong> Joki bertanggung jawab melakukan perbaikan apabila ada evaluasi dosen sesuai lingkup awal.</li>
+      <li><strong>Komunikasi Berkala:</strong> Melaporkan progres minimal 2 hari sekali ke kontak admin JOKMASOK.CO via WhatsApp.</li>
+    </ol>
+
+    <!-- Tanda Tangan Dokumen -->
+    <table style="width: 100%; border-collapse: collapse; margin-top: 18px; text-align: center; font-size: 8pt;">
+      <tr>
+        <td style="width: 50%;">
+          <div>Ditetapkan Oleh,</div>
+          <div style="font-weight: bold; color: #0284c7;">Admin Pengelola JOKMASOK.CO</div>
+          <div style="height: 34px;"></div>
+          <div style="font-weight: bold; text-decoration: underline;">Management JOKMASOK.CO</div>
+          <div style="font-size: 7pt; color: #64748b;">Verified Digital Dispatch</div>
+        </td>
+        <td style="width: 50%;">
+          <div>Diterima & Disanggupi Oleh,</div>
+          <div style="font-weight: bold; color: #0f172a;">Pekerja / Joki Pelaksana</div>
+          <div style="height: 34px;"></div>
+          <div id="pdf-sig-worker" style="font-weight: bold; text-decoration: underline;">Pekerja</div>
+          <div style="font-size: 7pt; color: #64748b;">Konfirmasi Resmi Tugas</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxgwyni7Nhd3OfDD9-manjDxLMxlhhfMTYyZ_dQqbTffcP61SidX2C4ayyUXBh-RObB/exec";
+
+    const WORKER_LIST = [
+      "Ahmad Sauki",
+      "Gazali Rahman",
+      "Hasmi Muzaky",
+      "Muhamad Alpiannor",
+      "Muhammad Syahri Ramadhan",
+      "Nia Jesica"
+    ];
+
+    const formatRupiah = (val) => {
+      const num = Number(val) || 0;
+      return "Rp " + num.toLocaleString('id-ID');
+    };
+
+    const unformatRupiah = (val) => {
+      return Number(String(val).replace(/[^0-9]/g, '')) || 0;
+    };
+
+    const attachRupiahMask = (inputElement, onChangeCallback) => {
+      inputElement.addEventListener('input', (e) => {
+        let rawVal = unformatRupiah(e.target.value);
+        e.target.value = rawVal === 0 ? '' : formatRupiah(rawVal);
+        if (onChangeCallback) onChangeCallback();
+      });
+    };
+
+    const calculateWorkerTier = (taskCount) => {
+      if (taskCount >= 13) {
+        return { tier: "👑 King Maharaja Penelitian", stars: "⭐ 5.0" };
+      } else if (taskCount >= 7) {
+        const s = (4.8 + ((taskCount - 7) / 5) * 0.1).toFixed(1);
+        return { tier: "🧘‍♂️ Sepuh Joki", stars: `⭐ ${s}` };
+      } else if (taskCount >= 3) {
+        const s = (4.4 + ((taskCount - 3) / 3) * 0.3).toFixed(1);
+        return { tier: "⚡ Anak Rajin", stars: `⭐ ${s}` };
+      } else {
+        const s = (4.0 + (taskCount * 0.15)).toFixed(1);
+        return { tier: "🌱 Penjoki Pendatang", stars: `⭐ ${s}` };
+      }
+    };
+
+    let globalCurrentTask = null;
+    let globalWorkerStats = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const taskId = urlParams.get('id');
+
+      if (!taskId) {
+        alert('ID tugas tidak ditemukan!');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      document.getElementById('task-id').value = taskId;
+      document.getElementById('task-id-badge').textContent = `Memuat ID: ${taskId}...`;
+
+      const inputFee = document.getElementById('worker-fee');
+      const inputPaid = document.getElementById('amount-paid');
+      const previewBalance = document.getElementById('preview-balance');
+      const previewProfit = document.getElementById('preview-profit');
+
+      const calculatePreview = () => {
+        const totalDeal = Number(globalCurrentTask?.totalDeal) || 0;
+        const fee = unformatRupiah(inputFee.value);
+        const paid = unformatRupiah(inputPaid.value);
+        previewBalance.textContent = formatRupiah(totalDeal - paid);
+        previewProfit.textContent = formatRupiah(totalDeal - fee);
+      };
+
+      attachRupiahMask(inputFee, calculatePreview);
+      attachRupiahMask(inputPaid, calculatePreview);
+
+      // Listener Tombol +1 Tambah Revisi
+      document.getElementById('btn-add-revision').addEventListener('click', () => {
+        const revInput = document.getElementById('revision-count');
+        revInput.value = (Number(revInput.value) || 0) + 1;
+        document.getElementById('task-status').value = 'Revisi';
+      });
+
+      try {
+        const res = await fetch(`${API_URL}?_nocache=${Date.now()}`, { cache: 'no-store' });
+        const tasks = await res.json();
+        globalCurrentTask = tasks.find(t => String(t.id).trim() === String(taskId).trim());
+
+        if (!globalCurrentTask) {
+          alert('Data tugas tidak ditemukan di database!');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        WORKER_LIST.forEach(name => { globalWorkerStats[name] = 0; });
+        tasks.forEach(t => {
+          const w = String(t.worker || '').trim();
+          if (globalWorkerStats.hasOwnProperty(w)) {
+            globalWorkerStats[w]++;
+          }
+        });
+
+        const workerSelect = document.getElementById('worker-select');
+        workerSelect.innerHTML = '<option value="" disabled selected>Pilih pekerja...</option>';
+
+        WORKER_LIST.forEach(name => {
+          const count = globalWorkerStats[name] || 0;
+          const { tier, stars } = calculateWorkerTier(count);
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = `${name} — ${stars} [${tier.split(' ')[1] || tier}] (${count} Tugas)`;
+          workerSelect.appendChild(opt);
+        });
+
+        document.getElementById('task-id-badge').textContent = `ID Tugas: ${globalCurrentTask.id} • Tanggal: ${globalCurrentTask.date || '-'}`;
+        document.getElementById('d-client').textContent = `${globalCurrentTask.clientName} (${globalCurrentTask.phone || '-'})`;
+        document.getElementById('d-institution').textContent = `${globalCurrentTask.institution || '-'} • ${globalCurrentTask.level || '-'}`;
+        document.getElementById('d-title').textContent = globalCurrentTask.taskTitle || '-';
+        document.getElementById('d-package').textContent = globalCurrentTask.packageDetail || 'Skripsi';
+        document.getElementById('d-installment').textContent = globalCurrentTask.installmentDetail || 'Standar';
+        document.getElementById('d-duration').textContent = globalCurrentTask.duration || '-';
+        document.getElementById('d-notes').textContent = globalCurrentTask.notes || 'Tidak ada catatan khusus.';
+
+        const linksContainer = document.getElementById('d-links');
+        const fileLink = globalCurrentTask.fileUrl ? `<a href="${globalCurrentTask.fileUrl}" target="_blank" style="color: var(--accent-cyan); text-decoration: underline; margin-right: 12px;">📎 Bahan Tugas</a>` : '';
+        const proofLink = globalCurrentTask.paymentProofUrl ? `<a href="${globalCurrentTask.paymentProofUrl}" target="_blank" style="color: #22c55e; text-decoration: underline;">💳 Bukti Klien</a>` : '';
+        linksContainer.innerHTML = (fileLink || proofLink) ? `${fileLink} ${proofLink}` : '<span style="color: var(--text-muted);">Tidak ada lampiran</span>';
+
+        document.getElementById('task-status').value = globalCurrentTask.status || 'Antrean';
+        document.getElementById('revision-count').value = globalCurrentTask.revisionCount || 0;
+        
+        document.getElementById('deal-price-display').value = formatRupiah(globalCurrentTask.totalDeal || 0);
+        inputFee.value = globalCurrentTask.fee ? formatRupiah(globalCurrentTask.fee) : '';
+        inputPaid.value = globalCurrentTask.amountPaid ? formatRupiah(globalCurrentTask.amountPaid) : '';
+
+        if (globalCurrentTask.worker && WORKER_LIST.includes(globalCurrentTask.worker.trim())) {
+          workerSelect.value = globalCurrentTask.worker.trim();
+        }
+
+        const tierCard = document.getElementById('worker-tier-card');
+        const updateWorkerTierDisplay = () => {
+          const selectedWorker = workerSelect.value;
+          if (selectedWorker) {
+            const count = globalWorkerStats[selectedWorker] || 0;
+            const { tier, stars } = calculateWorkerTier(count);
+            document.getElementById('tier-worker-name').textContent = selectedWorker;
+            document.getElementById('tier-worker-meta').textContent = `Total jam terbang: ${count} tugas tercatat`;
+            document.getElementById('tier-worker-badge').textContent = tier;
+            document.getElementById('tier-worker-stars').textContent = stars;
+            tierCard.style.display = 'flex';
+          } else {
+            tierCard.style.display = 'none';
+          }
+        };
+
+        workerSelect.addEventListener('change', updateWorkerTierDisplay);
+        updateWorkerTierDisplay();
+        calculatePreview();
+
+      } catch (err) {
+        console.error(err);
+        alert('Gagal mengambil rincian data dari database.');
+      }
+
+      // Generate Download PDF
+      document.getElementById('btn-generate-pdf').addEventListener('click', () => {
+        const workerSelect = document.getElementById('worker-select');
+        const selectedWorker = workerSelect.value;
+
+        if (!selectedWorker) {
+          alert('Silakan pilih pekerja/joki terlebih dahulu!');
+          workerSelect.focus();
+          return;
+        }
+
+        const feeVal = unformatRupiah(document.getElementById('worker-fee').value);
+        if (feeVal <= 0) {
+          alert('Harap isi nominal Fee Joki terlebih dahulu.');
+          document.getElementById('worker-fee').focus();
+          return;
+        }
+
+        const count = globalWorkerStats[selectedWorker] || 0;
+        const { tier, stars } = calculateWorkerTier(count);
+        const adminProofLink = document.getElementById('admin-proof-payment').value.trim();
+
+        document.getElementById('pdf-doc-id').textContent = `ID DOKUMEN: WO/${globalCurrentTask.id}`;
+        document.getElementById('pdf-worker-val').textContent = `${selectedWorker} [${tier} • ${stars}]`;
+        document.getElementById('pdf-duration-val').textContent = globalCurrentTask.duration || '-';
+
+        document.getElementById('pdf-client-name').textContent = globalCurrentTask.clientName || '-';
+        document.getElementById('pdf-client-inst').textContent = `${globalCurrentTask.institution || '-'} — ${globalCurrentTask.level || '-'}`;
+        document.getElementById('pdf-title-val').textContent = globalCurrentTask.taskTitle || '-';
+        document.getElementById('pdf-package-val').textContent = globalCurrentTask.packageDetail || '-';
+        document.getElementById('pdf-link-val').textContent = globalCurrentTask.fileUrl || 'Menyusul via chat WhatsApp';
+        document.getElementById('pdf-notes-val').textContent = globalCurrentTask.notes || 'Format standar akademik, bebas plagiasi Turnitin maks. 20%';
+        
+        document.getElementById('pdf-fee-val').textContent = formatRupiah(feeVal);
+        document.getElementById('pdf-admin-proof').textContent = adminProofLink ? adminProofLink : 'Tercatat Resmi di Sistem JOKMASOK.CO';
+        document.getElementById('pdf-sig-worker').textContent = selectedWorker;
+
+        const element = document.getElementById('pdf-printable-area');
+        element.style.display = 'block';
+
+        const opt = {
+          margin: [6, 8, 6, 8],
+          filename: `WorkOrder_${globalCurrentTask.id}_${selectedWorker.replace(/\s+/g, '_')}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const btnPdf = document.getElementById('btn-generate-pdf');
+        btnPdf.textContent = '⏳ Sedang Menyusun PDF...';
+        btnPdf.disabled = true;
+
+        html2pdf().set(opt).from(element).save().then(() => {
+          element.style.display = 'none';
+          btnPdf.textContent = '📥 Download Otomatis PDF Work Order Joki';
+          btnPdf.disabled = false;
+        });
+      });
+
+      // Simpan Perubahan ke Database
+      const form = document.getElementById('form-manage-task');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('btn-submit-update');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan...';
+
+        const workerSelect = document.getElementById('worker-select');
+        const selectedWorker = workerSelect.value.trim();
+
+        const payload = {
+          action: 'updateTask',
+          taskId: String(document.getElementById('task-id').value).trim(),
+          status: String(document.getElementById('task-status').value).trim(),
+          worker: selectedWorker,
+          fee: unformatRupiah(document.getElementById('worker-fee').value),
+          amountPaid: unformatRupiah(document.getElementById('amount-paid').value),
+          revisionCount: Number(document.getElementById('revision-count').value) || 0
+        };
+
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+
+          alert(`Order ${payload.taskId} berhasil diperbarui!\nStatus: ${payload.status}\nRevisi: ${payload.revisionCount}x`);
+          window.location.href = 'alur-tugas.html';
+        } catch (err) {
+          console.error(err);
+          alert('Terjadi kesalahan saat menyimpan pembaruan.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Simpan & Update Status';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
