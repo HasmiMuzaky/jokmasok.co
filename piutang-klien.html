@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Rekap Piutang Klien - JOKMASOK.CO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .receivables-header-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 641px) {
+      .receivables-header-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .search-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 0.82rem;
+      outline: none;
+      width: 100%;
+      max-width: 320px;
+      font-family: inherit;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--panel-bg);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+      overflow-x: auto;
+    }
+
+    .tab-item {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-item.active {
+      background: var(--panel-card);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-wa-tagihan {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-wa-tagihan:hover {
+      opacity: 0.85;
+    }
+
+    .status-lunas {
+      color: var(--status-success);
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drawer Samping -->
+  <aside id="menu-drawer" class="menu-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 800; font-size: 1.05rem; color: #fff;">JOKMASOK.CO</div>
+        <div style="font-size: 0.68rem; color: var(--accent-cyan);">Jasa Joki Aman dan Terpercaya</div>
+      </div>
+      <button id="btn-close-menu" class="btn-icon" aria-label="Tutup Menu">✕</button>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">📊 Dashboard Utama</a>
+      <a href="alur-tugas.html" class="nav-link">📋 Alur Tugas (Kanban)</a>
+      <a href="piutang-klien.html" class="nav-link active">💰 Rekap Piutang Klien</a>
+      <a href="tambah-order.html" class="nav-link">➕ Catat Order Baru</a>
+      <button id="menu-refresh" class="nav-link" style="background: none; border: none; width: 100%; cursor: pointer;">🔄 Sinkronkan Database</button>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="menu-overlay"></div>
+
+  <!-- Header Sticky -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <button id="btn-open-menu" class="btn-icon" aria-label="Buka Menu">☰</button>
+      <div>
+        <div class="brand-title">Rekap Piutang Klien</div>
+        <div class="brand-tagline">Monitoring Tagihan & Arus Kas</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="index.html" class="btn-secondary">← Beranda</a>
+      <a href="tambah-order.html" class="btn-primary">+ Order</a>
+    </div>
+  </header>
+
+  <main class="app-container">
+
+    <!-- 1. Kartu Ringkasan Piutang -->
+    <div class="section-header">
+      <h3 class="section-title">Ringkasan Tagihan Masuk</h3>
+      <span id="label-orders-count" class="section-subtitle">0 order</span>
+    </div>
+    <section class="metrics-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="metric-box">
+        <div class="metric-label">Total Kesepakatan</div>
+        <div class="metric-val" id="sum-total-deal">Rp 0</div>
+        <div class="metric-hint">Nilai kontrak keseluruhan</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Total Kas Masuk</div>
+        <div class="metric-val" id="sum-amount-paid" style="color: var(--status-success);">Rp 0</div>
+        <div class="metric-hint">DP & cicilan diterima</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Total Sisa Piutang</div>
+        <div class="metric-val" id="sum-remaining" style="color: var(--status-queue);">Rp 0</div>
+        <div class="metric-hint" id="hint-unpaid-orders">0 order tertunggak</div>
+      </div>
+    </section>
+
+    <!-- 2. Pencarian & Filter Status -->
+    <div class="receivables-header-bar">
+      <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari nama klien, kampus, ID tugas..." />
+
+      <div class="filter-tabs">
+        <button type="button" class="tab-item active" data-filter="unpaid">
+          Belum Lunas (<span id="badge-tab-unpaid">0</span>)
+        </button>
+        <button type="button" class="tab-item" data-filter="all">
+          Semua (<span id="badge-tab-all">0</span>)
+        </button>
+        <button type="button" class="tab-item" data-filter="paid">
+          Lunas (<span id="badge-tab-paid">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Tabel / Kartu Mobile Data Piutang -->
+    <div class="table-panel">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID & Tanggal</th>
+            <th>Klien & Kampus</th>
+            <th>Judul & Cicilan</th>
+            <th>Total Deal</th>
+            <th>Kas Masuk</th>
+            <th>Sisa Piutang</th>
+            <th style="text-align: right;">Aksi Pelunasan</th>
+          </tr>
+        </thead>
+        <tbody id="table-receivables-body">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Menyinkronkan data tagihan...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxgwyni7Nhd3OfDD9-manjDxLMxlhhfMTYyZ_dQqbTffcP61SidX2C4ayyUXBh-RObB/exec";
+
+    let rawTasks = [];
+    let activeFilter = 'unpaid';
+
+    const formatRupiah = (val) => {
+      return "Rp " + (Number(val) || 0).toLocaleString('id-ID');
+    };
+
+    const escapeHtml = (text) => {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(text || '').replace(/[&<>"']/g, (m) => map[m]);
+    };
+
+    const fetchReceivables = async () => {
+      try {
+        const tbody = document.getElementById('table-receivables-body');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Memuat data tagihan terbaru...</td></tr>';
+
+        const res = await fetch(`${API_URL}?_nocache=${Date.now()}`, {
+          method: 'GET',
+          cache: 'no-store'
+        });
+
+        if (!res.ok) throw new Error("Gagal mengambil data");
+
+        const data = await res.json();
+        rawTasks = Array.isArray(data) ? data : [];
+        renderReceivables();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('table-receivables-body').innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 30px;">Gagal terhubung ke database.</td></tr>';
+      }
+    };
+
+    const renderReceivables = () => {
+      let sumDeal = 0;
+      let sumPaid = 0;
+      let sumRemaining = 0;
+
+      let countUnpaid = 0;
+      let countPaid = 0;
+
+      rawTasks.forEach((t) => {
+        const deal = Number(t.totalDeal) || 0;
+        const paid = Number(t.amountPaid) || 0;
+        const remaining = Number(t.remainingBalance) || (deal - paid);
+
+        sumDeal += deal;
+        sumPaid += paid;
+        sumRemaining += remaining;
+
+        if (remaining > 0) {
+          countUnpaid++;
+        } else {
+          countPaid++;
+        }
+      });
+
+      // Update Angka Metrik Atas
+      document.getElementById('sum-total-deal').textContent = formatRupiah(sumDeal);
+      document.getElementById('sum-amount-paid').textContent = formatRupiah(sumPaid);
+      document.getElementById('sum-remaining').textContent = formatRupiah(sumRemaining);
+      document.getElementById('label-orders-count').textContent = `${rawTasks.length} total order`;
+      document.getElementById('hint-unpaid-orders').textContent = `${countUnpaid} order belum terlunasi`;
+
+      // Update Badge Tab
+      document.getElementById('badge-tab-unpaid').textContent = countUnpaid;
+      document.getElementById('badge-tab-all').textContent = rawTasks.length;
+      document.getElementById('badge-tab-paid').textContent = countPaid;
+
+      // Filter Data
+      const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+
+      const filtered = rawTasks.filter((item) => {
+        const deal = Number(item.totalDeal) || 0;
+        const paid = Number(item.amountPaid) || 0;
+        const remaining = Number(item.remainingBalance) || (deal - paid);
+
+        if (activeFilter === 'unpaid' && remaining <= 0) return false;
+        if (activeFilter === 'paid' && remaining > 0) return false;
+
+        if (searchQuery) {
+          const matchId = String(item.id || '').toLowerCase().includes(searchQuery);
+          const matchClient = String(item.clientName || '').toLowerCase().includes(searchQuery);
+          const matchInst = String(item.institution || '').toLowerCase().includes(searchQuery);
+          const matchTitle = String(item.taskTitle || '').toLowerCase().includes(searchQuery);
+          return matchId || matchClient || matchInst || matchTitle;
+        }
+
+        return true;
+      });
+
+      const tbody = document.getElementById('table-receivables-body');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 36px;">Tidak ada data tagihan yang sesuai kriteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+
+      filtered.forEach((item) => {
+        const deal = Number(item.totalDeal) || 0;
+        const paid = Number(item.amountPaid) || 0;
+        const remaining = Number(item.remainingBalance) || (deal - paid);
+
+        // Pengingat WhatsApp
+        let waAction = '';
+        const cleanPhone = String(item.phone || '').replace(/[^0-9]/g, '');
+        const internationalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+
+        if (remaining > 0 && cleanPhone) {
+          const msg = 
+            `Halo Kak *${item.clientName}*, salam dari tim *JOKMASOK.CO* 🙏%0A%0A` +
+            `Menginformasikan rekap status tagihan untuk pengerjaan tugas:%0A` +
+            `• *ID Tugas:* ${item.id}%0A` +
+            `• *Judul:* ${item.taskTitle}%0A` +
+            `• *Total Kesepakatan:* ${formatRupiah(deal)}%0A` +
+            `• *Sudah Dibayar:* ${formatRupiah(paid)}%0A` +
+            `• *Sisa Pelunasan:* *${formatRupiah(remaining)}*%0A%0A` +
+            `Apabila ada pembayaran termin lanjutan, bukti transfernya bisa dikirimkan ke kontak ini ya. Terima kasih banyak! ✨`;
+
+          waAction = `<a href="https://wa.me/${internationalPhone}?text=${msg}" target="_blank" class="btn-wa-tagihan">💬 Tagih WA</a>`;
+        } else if (remaining <= 0) {
+          waAction = `<span class="status-lunas">✓ Lunas</span>`;
+        }
+
+        const installmentBadge = (item.installmentDetail && item.installmentDetail !== '-')
+          ? `<div style="font-size: 0.7rem; color: #fbbf24; margin-top: 2px;">⚡ ${escapeHtml(item.installmentDetail)}</div>`
+          : `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Standar Penuh</div>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="m-top">
+              <strong style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(item.id)}</strong>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(item.date || '-')}</span>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: #fff;">${escapeHtml(item.clientName)}</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">${escapeHtml(item.institution || '-')}</div>
+          </td>
+          <td>
+            <div style="font-weight: 500; font-size: 0.82rem; color: #cbd5e1;">${escapeHtml(item.taskTitle)}</div>
+            ${installmentBadge}
+          </td>
+          <td>
+            <span style="color: var(--text-muted); font-size: 0.72rem;" class="m-hint-label">Deal: </span>
+            <strong>${formatRupiah(deal)}</strong>
+          </td>
+          <td>
+            <span style="color: var(--text-muted); font-size: 0.72rem;" class="m-hint-label">Masuk: </span>
+            <span style="color: var(--status-success); font-weight: 700;">${formatRupiah(paid)}</span>
+          </td>
+          <td>
+            <span style="color: var(--text-muted); font-size: 0.72rem;" class="m-hint-label">Sisa: </span>
+            <span style="font-weight: 800; color: ${remaining > 0 ? 'var(--status-queue)' : '#94a3b8'};">
+              ${formatRupiah(remaining)}
+            </span>
+          </td>
+          <td class="m-action">
+            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; width: 100%;">
+              ${waAction}
+              <a href="kelola-order.html?id=${encodeURIComponent(item.id)}" class="btn-secondary" style="font-size: 0.74rem; padding: 6px 10px;">Input Bayar</a>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // Filter Tab Click
+    document.querySelectorAll('.tab-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-item').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.getAttribute('data-filter');
+        renderReceivables();
+      });
+    });
+
+    // Realtime Search
+    document.getElementById('search-input').addEventListener('input', renderReceivables);
+
+    // Navigasi Drawer
+    const btnOpenMenu = document.getElementById('btn-open-menu');
+    const btnCloseMenu = document.getElementById('btn-close-menu');
+    const menuDrawer = document.getElementById('menu-drawer');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const menuRefresh = document.getElementById('menu-refresh');
+
+    const openDrawer = () => { menuDrawer.classList.add('open'); sidebarOverlay.classList.add('active'); };
+    const closeDrawer = () => { menuDrawer.classList.remove('open'); sidebarOverlay.classList.remove('active'); };
+
+    if (btnOpenMenu) btnOpenMenu.addEventListener('click', openDrawer);
+    if (btnCloseMenu) btnCloseMenu.addEventListener('click', closeDrawer);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeDrawer);
+
+    if (menuRefresh) {
+      menuRefresh.addEventListener('click', () => {
+        closeDrawer();
+        fetchReceivables();
+      });
+    }
+
+    fetchReceivables();
+  </script>
+</body>
+</html>

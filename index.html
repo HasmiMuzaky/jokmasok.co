@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Dashboard Utama - JOKMASOK.CO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Menu Drawer Samping -->
+  <aside id="menu-drawer" class="menu-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 800; font-size: 1.05rem; color: #fff;">JOKMASOK.CO</div>
+        <div style="font-size: 0.68rem; color: var(--accent-cyan);">Jasa Joki Aman dan Terpercaya</div>
+      </div>
+      <button id="btn-close-menu" class="btn-icon" aria-label="Tutup Menu">✕</button>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link active">📊 Dashboard Utama</a>
+      <a href="alur-tugas.html" class="nav-link">📋 Alur Tugas (Kanban)</a>
+      <a href="piutang-klien.html" class="nav-link">💰 Rekap Piutang Klien</a>
+      <a href="tambah-order.html" class="nav-link">➕ Catat Order Baru</a>
+      <button id="menu-refresh" class="nav-link" style="background: none; border: none; width: 100%; cursor: pointer;">🔄 Sinkronkan Database</button>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="menu-overlay"></div>
+
+  <!-- Header Sticky -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <button id="btn-open-menu" class="btn-icon" aria-label="Buka Menu">☰</button>
+      <div>
+        <div class="brand-title">JOKMASOK.CO</div>
+        <div class="brand-tagline">Pusat Manajemen</div>
+      </div>
+    </div>
+    <a href="tambah-order.html" class="btn-primary">+ Order</a>
+  </header>
+
+  <main class="app-container">
+
+    <!-- 1. Menu Pintasan -->
+    <section class="hub-shortcuts">
+      <div class="hub-card cyan">
+        <div>
+          <span class="hub-badge" style="color: var(--accent-cyan);">Papan Operasional</span>
+          <h2 class="hub-title">Alur Pengerjaan (Kanban)</h2>
+          <p class="hub-desc">Pantau antrean masuk, proses joki, & masa review tugas.</p>
+        </div>
+        <a href="alur-tugas.html" class="btn-primary" style="width: 100%;">Buka Kanban ➔</a>
+      </div>
+
+      <div class="hub-card amber">
+        <div>
+          <span class="hub-badge" style="color: var(--status-queue);">Keuangan & Tagihan</span>
+          <h2 class="hub-title">Monitoring Piutang Klien</h2>
+          <p class="hub-desc">Cek sisa cicilan klien dan kirim tagihan via WA.</p>
+        </div>
+        <a href="piutang-klien.html" class="btn-secondary" style="width: 100%; border-color: rgba(245, 158, 11, 0.3); color: var(--status-queue);">Buka Rekap Piutang ➔</a>
+      </div>
+    </section>
+
+    <!-- 2. Status Penugasan -->
+    <div class="section-header">
+      <h3 class="section-title">Status Alur Aktif</h3>
+    </div>
+    <section class="metrics-row">
+      <div class="metric-box">
+        <div class="metric-label">Antrean Masuk</div>
+        <div class="metric-val" id="stat-queue" style="color: var(--status-queue);">0</div>
+        <div class="metric-hint">Belum didelegasi</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Dikerjakan</div>
+        <div class="metric-val" id="stat-progress" style="color: var(--status-progress);">0</div>
+        <div class="metric-hint">Diproses joki</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Masa Review</div>
+        <div class="metric-val" id="stat-review" style="color: var(--status-review);">0</div>
+        <div class="metric-hint">Pengecekan hasil</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Joki Bertugas</div>
+        <div class="metric-val" id="stat-workers" style="color: var(--status-success);">0</div>
+        <div class="metric-hint">Pekerja aktif</div>
+      </div>
+    </section>
+
+    <!-- 3. Rekap Finansial -->
+    <div class="section-header">
+      <h3 class="section-title">Rekap Finansial</h3>
+      <span id="label-order-total" class="section-subtitle">0 order terdata</span>
+    </div>
+    <section class="metrics-row">
+      <div class="metric-box">
+        <div class="metric-label">Total Kesepakatan</div>
+        <div class="metric-val" id="fin-deal">Rp 0</div>
+        <div class="metric-hint">Nilai kontrak</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Kas Masuk</div>
+        <div class="metric-val" id="fin-paid" style="color: var(--status-success);">Rp 0</div>
+        <div class="metric-hint">DP / Pelunasan</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Sisa Piutang</div>
+        <div class="metric-val" id="fin-remaining" style="color: var(--status-queue);">Rp 0</div>
+        <div class="metric-hint">Belum lunas</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Estimasi Profit</div>
+        <div class="metric-val" id="fin-profit" style="color: var(--accent-cyan);">Rp 0</div>
+        <div class="metric-hint">Laba bersih admin</div>
+      </div>
+    </section>
+
+    <!-- 4. Tugas Berjalan Terkini -->
+    <div class="section-header">
+      <h3 class="section-title">Tugas Berjalan Terkini</h3>
+      <a href="alur-tugas.html" style="font-size: 0.74rem; color: var(--accent-cyan); text-decoration: none; font-weight: 600;">Lihat Semua ➔</a>
+    </div>
+
+    <div class="table-panel">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Klien & Kampus</th>
+            <th>Judul & Paket</th>
+            <th>Target Waktu</th>
+            <th>Pekerja</th>
+            <th>Status</th>
+            <th style="text-align: right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="table-recent-body">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Menyinkronkan data database...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
