@@ -98,7 +98,6 @@
 </head>
 <body>
 
-  <!-- Drawer Samping -->
   <aside id="menu-drawer" class="menu-drawer">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <div>
@@ -118,7 +117,6 @@
   </aside>
   <div id="sidebar-overlay" class="menu-overlay"></div>
 
-  <!-- Header Sticky -->
   <header class="app-header">
     <div class="brand-wrapper">
       <button id="btn-open-menu" class="btn-icon" aria-label="Buka Menu">☰</button>
@@ -135,7 +133,6 @@
 
   <main class="app-container">
 
-    <!-- 1. Kartu Ringkasan Piutang -->
     <div class="section-header">
       <h3 class="section-title">Ringkasan Tagihan Masuk</h3>
       <span id="label-orders-count" class="section-subtitle">0 order</span>
@@ -158,7 +155,6 @@
       </div>
     </section>
 
-    <!-- 2. Pencarian & Filter Status -->
     <div class="receivables-header-bar">
       <input type="text" id="search-input" class="search-box" placeholder="🔍 Cari nama klien, kampus, ID tugas..." />
 
@@ -175,7 +171,6 @@
       </div>
     </div>
 
-    <!-- 3. Tabel / Kartu Mobile Data Piutang -->
     <div class="table-panel">
       <table class="data-table">
         <thead>
@@ -205,8 +200,17 @@
     let rawTasks = [];
     let activeFilter = 'unpaid';
 
+    const parseNominal = (val) => {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      const str = String(val).replace(/Rp\s?/gi, '').replace(/\./g, '').replace(/,/g, '.').trim();
+      const num = parseFloat(str);
+      return isNaN(num) ? 0 : Math.round(num);
+    };
+
     const formatRupiah = (val) => {
-      return "Rp " + (Number(val) || 0).toLocaleString('id-ID');
+      const cleanNum = parseNominal(val);
+      return "Rp " + cleanNum.toLocaleString('id-ID');
     };
 
     const escapeHtml = (text) => {
@@ -244,9 +248,9 @@
       let countPaid = 0;
 
       rawTasks.forEach((t) => {
-        const deal = Number(t.totalDeal) || 0;
-        const paid = Number(t.amountPaid) || 0;
-        const remaining = Number(t.remainingBalance) || (deal - paid);
+        const deal = parseNominal(t.totalDeal);
+        const paid = parseNominal(t.amountPaid);
+        const remaining = Math.max(0, deal - paid);
 
         sumDeal += deal;
         sumPaid += paid;
@@ -259,25 +263,22 @@
         }
       });
 
-      // Update Angka Metrik Atas
       document.getElementById('sum-total-deal').textContent = formatRupiah(sumDeal);
       document.getElementById('sum-amount-paid').textContent = formatRupiah(sumPaid);
       document.getElementById('sum-remaining').textContent = formatRupiah(sumRemaining);
       document.getElementById('label-orders-count').textContent = `${rawTasks.length} total order`;
       document.getElementById('hint-unpaid-orders').textContent = `${countUnpaid} order belum terlunasi`;
 
-      // Update Badge Tab
       document.getElementById('badge-tab-unpaid').textContent = countUnpaid;
       document.getElementById('badge-tab-all').textContent = rawTasks.length;
       document.getElementById('badge-tab-paid').textContent = countPaid;
 
-      // Filter Data
       const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
 
       const filtered = rawTasks.filter((item) => {
-        const deal = Number(item.totalDeal) || 0;
-        const paid = Number(item.amountPaid) || 0;
-        const remaining = Number(item.remainingBalance) || (deal - paid);
+        const deal = parseNominal(item.totalDeal);
+        const paid = parseNominal(item.amountPaid);
+        const remaining = Math.max(0, deal - paid);
 
         if (activeFilter === 'unpaid' && remaining <= 0) return false;
         if (activeFilter === 'paid' && remaining > 0) return false;
@@ -302,11 +303,10 @@
       tbody.innerHTML = '';
 
       filtered.forEach((item) => {
-        const deal = Number(item.totalDeal) || 0;
-        const paid = Number(item.amountPaid) || 0;
-        const remaining = Number(item.remainingBalance) || (deal - paid);
+        const deal = parseNominal(item.totalDeal);
+        const paid = parseNominal(item.amountPaid);
+        const remaining = Math.max(0, deal - paid);
 
-        // Pengingat WhatsApp
         let waAction = '';
         const cleanPhone = String(item.phone || '').replace(/[^0-9]/g, '');
         const internationalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
@@ -372,7 +372,6 @@
       });
     };
 
-    // Filter Tab Click
     document.querySelectorAll('.tab-item').forEach((btn) => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-item').forEach((b) => b.classList.remove('active'));
@@ -382,10 +381,8 @@
       });
     });
 
-    // Realtime Search
     document.getElementById('search-input').addEventListener('input', renderReceivables);
 
-    // Navigasi Drawer
     const btnOpenMenu = document.getElementById('btn-open-menu');
     const btnCloseMenu = document.getElementById('btn-close-menu');
     const menuDrawer = document.getElementById('menu-drawer');
