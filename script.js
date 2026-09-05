@@ -24,8 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tabel Body
   const tableBody = document.getElementById('table-recent-body');
 
+  // Parser Angka Murni & Anti String Concatenation
+  const parseNominal = (val) => {
+    if (val === null || val === undefined || val === '') return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    const str = String(val).replace(/Rp\s?/gi, '').replace(/\./g, '').replace(/,/g, '.').trim();
+    const num = parseFloat(str);
+    return isNaN(num) ? 0 : Math.round(num);
+  };
+
   const formatRupiah = (val) => {
-    return "Rp " + (Number(val) || 0).toLocaleString('id-ID');
+    const cleanNum = parseNominal(val);
+    return "Rp " + cleanNum.toLocaleString('id-ID');
   };
 
   const escapeHtml = (text) => {
@@ -33,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(text || '').replace(/[&<>"']/g, (m) => map[m]);
   };
 
-  // Muat Data dengan Bypass Cache
   const fetchDashboardData = async () => {
     try {
       if (tableBody) {
@@ -64,27 +73,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeWorkersSet = new Set();
 
     let sumDeal = 0;
-    let sumPaid = 0;
+    let sumCash = 0;
     let sumRemaining = 0;
     let sumProfit = 0;
 
     const activeList = [];
 
     tasks.forEach((t) => {
-      const deal = Number(t.totalDeal) || 0;
-      const paid = Number(t.amountPaid) || 0;
-      const remaining = Number(t.remainingBalance) || (deal - paid);
-      const profit = Number(t.profit) || (deal - (Number(t.fee) || 0));
+      // Pastikan konversi ke Number bulat
+      const deal = parseNominal(t.totalDeal);
+      const paid = parseNominal(t.amountPaid);
+      const fee = parseNominal(t.fee);
+      const remaining = Math.max(0, deal - paid);
+      const profit = deal - fee;
 
       sumDeal += deal;
-      sumPaid += paid;
+      sumCash += paid;
       sumRemaining += remaining;
       sumProfit += profit;
 
       const workerClean = String(t.worker || '').trim();
       const statusClean = String(t.status || 'Antrean').trim().toLowerCase();
 
-      // Arsip selesai tidak dihitung di tugas aktif
       if (statusClean === 'selesai') return;
 
       activeList.push(t);
@@ -105,16 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Update Angka Metrik
+    // Update Counter Alur
     if (statQueue) statQueue.textContent = qCount;
     if (statProgress) statProgress.textContent = pCount;
     if (statReview) statReview.textContent = rCount;
     if (statWorkers) statWorkers.textContent = `${activeWorkersSet.size} Orang`;
 
-    // Update Finansial
+    // Update Finansial Akurat
     if (labelOrderTotal) labelOrderTotal.textContent = `Total ${tasks.length} Pesanan Terdata`;
     if (finDeal) finDeal.textContent = formatRupiah(sumDeal);
-    if (finPaid) finPaid.textContent = formatRupiah(sumPaid);
+    if (finPaid) finPaid.textContent = formatRupiah(sumCash);
     if (finRemaining) finRemaining.textContent = formatRupiah(sumRemaining);
     if (finProfit) finProfit.textContent = formatRupiah(sumProfit);
 
@@ -172,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Navigasi Drawer
+  // Drawer Samping
   const openDrawer = () => { menuDrawer.classList.add('open'); sidebarOverlay.classList.add('active'); };
   const closeDrawer = () => { menuDrawer.classList.remove('open'); sidebarOverlay.classList.remove('active'); };
 
@@ -189,4 +199,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchDashboardData();
 });
-
